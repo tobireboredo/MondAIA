@@ -9,7 +9,7 @@ load_dotenv()
 
 key = os.getenv("SECRET_KEY")
 algoritmo = os.getenv("ALGORITHM")
-expire = os.getenv("ACCES_TOKEN_EXPIRE_MINUTES")
+expire = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -19,7 +19,7 @@ def verify_password(plain_password, hashed_password):
 def get_password_hash(password):
     return pwd_context.hash(password)
 
-def create_acces_token(data: dict):
+def create_access_token(data: dict):
     to_encode = data.copy()
     expiring = datetime.now(timezone.utc) + timedelta(minutes=expire)
     to_encode.update({"exp": expiring})

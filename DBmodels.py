@@ -1,6 +1,7 @@
 from sqlmodel import SQLModel, Field
 
-class CreateUserDB(SQLModel):   
+class User(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
+    username: str
     password: str
-    name: str
+    name: str | None = None
