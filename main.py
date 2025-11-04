@@ -24,11 +24,21 @@ def read_root():
 @app.post("/users/")
 def create_user(user: CreateUser, session: Session = Depends(get_session)):
     try:
-        hashed_password = JWT.get_password_hash(user.password)
+        # 🔹 Validamos y truncamos la contraseña a un máximo de 72 caracteres
+        if len(user.password) > 72:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="La contraseña no puede tener más de 72 caracteres."
+            )
+        
+        password = user.password[:72]  # Truncar la contraseña si es necesario
+        hashed_password = JWT.get_password_hash(password)
+
         db_user = User(username=user.username, password=hashed_password, name=user.name)
         session.add(db_user)
         session.commit()
         session.refresh(db_user)
+
         return {
             "message": "Usuario creado con éxito",
             "user": {
@@ -38,8 +48,10 @@ def create_user(user: CreateUser, session: Session = Depends(get_session)):
             }
         }
     except Exception as e:
-        # Esto devuelve el error real en JSON para que podamos ver qué falla
-        return {"error": str(e)}
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al crear el usuario: {str(e)}"
+        )
 
 # Login y generación de token
 @app.post("/login/token")

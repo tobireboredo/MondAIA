@@ -7,8 +7,13 @@ from typing import Annotated
 # URL de conexión a la base de datos Neon
 DATABASE_URL = "postgresql://neondb_owner:npg_pA91YWdrtBMv@ep-divine-grass-acn65ybf-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require"
 
-# Crear el motor de conexión
-engine = create_engine(DATABASE_URL, echo=True)
+# Crear el motor de conexión con pool_pre_ping=True para reconectar si Neon corta la conexión
+engine = create_engine(
+    DATABASE_URL,
+    echo=True,
+    pool_pre_ping=True,     # 🔥 clave para evitar "SSL connection has been closed"
+    pool_recycle=300        # opcional: recicla conexiones cada 5 min para mantenerlas activas
+)
 
 # Crear las tablas en la base de datos (si no existen)
 def create_db_and_tables():

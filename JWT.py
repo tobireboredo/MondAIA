@@ -17,6 +17,9 @@ def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 def get_password_hash(password):
+    if not isinstance(password, str):
+        raise ValueError("Password must be a string")
+    password = password[:72] 
     return pwd_context.hash(password)
 
 def create_access_token(data: dict):
