@@ -11,8 +11,8 @@ DATABASE_URL = "postgresql://neondb_owner:npg_pA91YWdrtBMv@ep-divine-grass-acn65
 engine = create_engine(
     DATABASE_URL,
     echo=True,
-    pool_pre_ping=True,     # 🔥 clave para evitar "SSL connection has been closed"
-    pool_recycle=300        # opcional: recicla conexiones cada 5 min para mantenerlas activas
+    pool_pre_ping=True,    
+    pool_recycle=300        
 )
 
 # Crear las tablas en la base de datos (si no existen)
