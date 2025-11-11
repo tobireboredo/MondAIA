@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Path
 import uvicorn
 from sqlmodel import Session, select, SQLModel
 from DBconnection import get_session, engine
@@ -74,6 +74,46 @@ def create_task(
     session.commit()
     session.refresh(db_task)
     return db_task
+
+# Editar tarea existente
+@app.put("/task/{task_id}", response_model=TaskRead)
+def update_task(
+    task_id: int = Path(..., description="ID de la tarea a actualizar"),
+    updated_task: TaskCreate = Depends(),  # Datos nuevos
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    # Buscar la tarea en la bdd
+    db_task = session.get(Task, task_id)
+    if not db_task:
+        raise HTTPException(status_code=404, detail="Tarea no encontrada")
+
+    # Verificar el dueño
+    if db_task.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="No tienes permiso para modificar esta tarea")
+
+    task_data = updated_task.model_dump(exclude_unset=True)
+    for key, value in task_data.items():
+        setattr(db_task, key, value)
+
+    session.add(db_task)
+    session.commit()
+    session.refresh(db_task)
+    session.close()
+    return db_task
+
+@app.get("/tasks/", response_model=list[TaskRead])
+def get_tasks(
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    statement = select(Task).where(Task.owner_id == current_user.id)
+    db_tasks = session.exec(statement).all()
+
+    if not db_tasks:
+        raise HTTPException	(status_code=404, detail="Todavía no tenés tareas...")
+    return db_tasks
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
