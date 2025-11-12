@@ -102,17 +102,49 @@ def update_task(
     session.close()
     return db_task
 
-@app.get("/tasks/", response_model=list[TaskRead])
-def get_tasks(
+@app.get("/tasks/user/{user_id}", response_model=list[TaskRead])
+def get_tasks_by_user(
+    user_id: int,
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ):
-    statement = select(Task).where(Task.owner_id == current_user.id)
+    # 🔒 Validamos que el usuario logueado sea el mismo o tenga permisos (admin, por ejemplo)
+    if current_user.id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="No tienes permiso para ver las tareas de otro usuario."
+        )
+
+    # 🔍 Buscamos todas las tareas que pertenezcan al user_id indicado
+    statement = select(Task).where(Task.owner_id == user_id)
     db_tasks = session.exec(statement).all()
 
     if not db_tasks:
-        raise HTTPException	(status_code=404, detail="Todavía no tenés tareas...")
+        raise HTTPException(status_code=404, detail="No se encontraron tareas para este usuario")
+
     return db_tasks
+
+@app.delete("/task/{task_id}")
+def delete_task(
+    task_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    db_task = session.get(Task, task_id)
+    if not db_task:
+        raise HTTPException(status_code=404, detail="Tarea no encontrada")
+
+    if db_task.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="No tienes permiso para eliminar esta tarea"
+        )
+
+    session.delete(db_task)
+    session.commit()
+
+    return {"message": f"Tarea con ID {task_id} eliminada correctamente"}
+
 
 
 if __name__ == "__main__":
