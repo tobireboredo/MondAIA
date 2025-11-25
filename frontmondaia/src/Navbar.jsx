@@ -15,10 +15,25 @@ export default function Navbar() {
       </Link>
 
       {/* Links */}
-      <div className="flex gap-6 text-lg">
-        <Link to="/" className="hover:text-blue-500 transition">Home</Link>
-        <Link to="/about" className="hover:text-blue-500 transition">About</Link>
-        <Link to="/contact" className="hover:text-blue-500 transition">Contact</Link>
+      <div className="flex gap-6 text-lg items-center">
+
+        {/* Crear cuenta */}
+        <Link 
+          to="/register"
+          className="underline"
+        >
+          Crear cuenta
+        </Link>
+
+        {/* Iniciar sesión */}
+        <Link 
+          to="/login"
+          className="px-4 py-1 rounded-lg text-white transition"
+          style={{ backgroundColor: "#366E18" }}
+        >
+          Iniciar sesión
+        </Link>
+
       </div>
 
     </nav>

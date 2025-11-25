@@ -1,3 +1,8 @@
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger("uvicorn")
+
 from fastapi import FastAPI, Depends, HTTPException, status, Path
 import uvicorn
 from sqlmodel import Session, select, SQLModel
@@ -7,10 +12,26 @@ from DBmodels import CreateUser, ReadUser, TaskCreate, TaskRead
 import JWT
 from JWT import get_current_user
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Request
 
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    logger.info(f"--> {request.method} {request.url}")
+    response = await call_next(request)
+    logger.info(f"<-- {response.status_code} {request.url}")
+    return response
 
 @app.get("/")
 def read_root():
@@ -21,7 +42,7 @@ def read_root():
 def create_user(
     user: CreateUser,
     session: Session = Depends(get_session),
-    current_user: str = Depends(get_current_user)  # ← agrega esto
+    #current_user: str = Depends(get_current_user)  # ← agrega esto
 ):
     try:
         # 🔹 Validamos y truncamos la contraseña a un máximo de 72 caracteres
