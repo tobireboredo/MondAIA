@@ -70,7 +70,10 @@ def create_user(
 
 # Login y generación de token
 @app.post("/login/token")
-def login(form_data: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(get_session)):
+def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    session: Session = Depends(get_session)
+):
     statement = select(User).where(User.username == form_data.username)
     db_user = session.exec(statement).first()
 
@@ -82,7 +85,14 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), session: Session = D
         )
 
     access_token = JWT.create_access_token(data={"sub": db_user.username})
-    return {"access_token": access_token, "token_type": "bearer", "id": db_user.id}
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "id": db_user.id,
+        "username": db_user.username,
+        "name": db_user.name,   # AGREGADO
+    }
 
 @app.post("/task/create", response_model=TaskRead)
 def create_task(

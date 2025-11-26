@@ -1,10 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import logo_grande from "./assets/MondAIA_logo1.png";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "./userContext.jsx";
 
 const Login = () => {
 
+  const navigate = useNavigate();
+  const { setUser } = useContext(UserContext);
   const [usuario, setUsuario] = useState("");
   const [password, setPassword] = useState("");
+
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -21,8 +26,8 @@ const Login = () => {
           "Content-Type": "application/x-www-form-urlencoded"
         },
         body: new URLSearchParams({
-          username: usuario,     // 👈 FastAPI requiere "username"
-          password: password     // 👈 y requiere "password"
+          username: usuario,
+          password: password
         })
       });
 
@@ -30,7 +35,21 @@ const Login = () => {
       console.log("Login:", data);
 
       if (response.ok) {
+        // Guardamos todo lo que devuelve el backend
+        localStorage.setItem("token", data.access_token);
+        localStorage.setItem("username", data.username);
+        localStorage.setItem("name", data.name);
+        localStorage.setItem("userId", data.id);
+        
+        setUser({
+          id: data.id,
+          username: data.username,
+          name: data.name,
+        });
+      
         alert("Inicio de sesión exitoso");
+
+        navigate("/");   // 👈 YA NO /home
       } else {
         alert(data.detail || "Credenciales incorrectas");
       }
@@ -43,8 +62,8 @@ const Login = () => {
 
   return (
     <div className="text-center mt-4">
-      
-      <img 
+
+      <img
         src={logo_grande}
         alt="logo"
         className="mx-auto mt-4 w-52"
