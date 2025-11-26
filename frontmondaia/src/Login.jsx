@@ -40,7 +40,7 @@ const Login = () => {
         localStorage.setItem("username", data.username);
         localStorage.setItem("name", data.name);
         localStorage.setItem("userId", data.id);
-        
+
         setUser({
           id: data.id,
           username: data.username,
@@ -49,7 +49,7 @@ const Login = () => {
       
         alert("Inicio de sesión exitoso");
 
-        navigate("/");   // 👈 YA NO /home
+        navigate("/home");
       } else {
         alert(data.detail || "Credenciales incorrectas");
       }
