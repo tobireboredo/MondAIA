@@ -3,7 +3,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("uvicorn")
 
-from fastapi import FastAPI, Depends, HTTPException, status, Path
+from fastapi import FastAPI, Depends, HTTPException, status, Path, Body
 import uvicorn
 from sqlmodel import Session, select, SQLModel
 from DBconnection import get_session, engine
@@ -111,7 +111,7 @@ def create_task(
 @app.put("/task/{task_id}", response_model=TaskRead)
 def update_task(
     task_id: int = Path(..., description="ID de la tarea a actualizar"),
-    updated_task: TaskCreate = Depends(),  # Datos nuevos
+    updated_task: TaskCreate = Body(),  # Datos nuevos
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ):

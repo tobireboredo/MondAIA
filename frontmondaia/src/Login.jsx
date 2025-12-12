@@ -35,7 +35,6 @@ const Login = () => {
       console.log("Login:", data);
 
       if (response.ok) {
-        // Guardamos todo lo que devuelve el backend
         localStorage.setItem("token", data.access_token);
         localStorage.setItem("username", data.username);
         localStorage.setItem("name", data.name);
